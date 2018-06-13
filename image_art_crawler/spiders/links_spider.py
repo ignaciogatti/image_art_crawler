@@ -3,7 +3,9 @@ import re
 from scrapy.spiders import CrawlSpider
 from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from image_art_crawler.items import ImageArtCrawlerItem
-
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
 
 keys_map={u'G\xe9nero': 'genre', u'Autor': 'author', u'Origen': 'origin', u'Medidas': 'dimmensions', u'Objeto': 'object', 
     u'Estilo': 'style', u'T\xe9cnica': 'technique', u'Soporte': 'support', u'Escuela': 'school', u'Fecha':'date'}
@@ -12,19 +14,29 @@ class LinkArtSpider(CrawlSpider):
     name = "linkArt"
 
     def start_requests(self):
-        queries =['antonio+berni','pridiliano+pueyrredon', 'emilio+pettoruti', 'lino+spilimbergo']
-        urls = [
-            'https://www.bellasartes.gob.ar/coleccion/buscar?q='
-        ]
-        for url in urls:
-            for q in queries:
-                yield scrapy.Request(url=url+q, callback=self.parse)
+        browser = webdriver.Chrome()
+        browser.get('http://www.bellasartes.gob.ar/coleccion/obras')
+        SCROLL_PAUSE_TIME = 2
 
+        # Get scroll height
+        last_height = browser.execute_script("return document.body.scrollHeight")
 
-    def parse(self, response):
-        for link in LxmlLinkExtractor(allow=r'https://www.bellasartes.gob.ar/coleccion/obra/.+', restrict_xpaths='//div[@class="obra card"]').extract_links(response):
-            yield response.follow(link, self.parse_image)
+        while True:
+            # Scroll down to bottom
+            browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # Wait to load page
+            time.sleep(SCROLL_PAUSE_TIME)
+            # Calculate new scroll height and compare with last scroll height
+            new_height = browser.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
         
+        elems = browser.find_elements_by_xpath('//div[@class="obras"]//a')
+        urls = [e.get_attribute("href") for e in elems]
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse_image)
+      
 
     def parse_image(self, response):
         data_image = {}
