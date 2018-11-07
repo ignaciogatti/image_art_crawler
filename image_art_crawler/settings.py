@@ -46,10 +46,10 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-SPIDER_MIDDLEWARES = {
+#SPIDER_MIDDLEWARES = {
 #    'image_art_crawler.middlewares.ImageArtCrawlerSpiderMiddleware': 543,
-    'scrapy.spidermiddlewares.depth.DepthMiddleware':0
-}
+#    'scrapy.spidermiddlewares.depth.DepthMiddleware':0
+#}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
@@ -65,11 +65,12 @@ SPIDER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-IMAGES_STORE = '/home/ignacio/Datasets/art-image'
+IMAGES_STORE = '/home/ignacio/Datasets/art-image/impressionism'
 
 ITEM_PIPELINES = {
     'image_art_crawler.pipelines.CustomImageNamePipeline': 1,
-    'image_art_crawler.pipelines.ImageArtCrawlerPipeline': 300
+    'image_art_crawler.pipelines.ImpressionismCrawlerPipeline':300
+#    'image_art_crawler.pipelines.ImageArtCrawlerPipeline': 300
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

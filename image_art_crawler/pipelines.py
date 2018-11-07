@@ -66,6 +66,26 @@ class ImageArtCrawlerPipeline(object):
         return item
 
 
+class ImpressionismCrawlerPipeline(ImageArtCrawlerPipeline):
+
+
+    def setup_db_con(self):
+        self.con = sqlite3.connect('/home/ignacio/impressionism.db')
+        self.cur = self.con.cursor()
+    
+    def create_table(self):
+        self.cur.execute('''create table if not exists image_data(
+            id varchar(10) primary key not null,
+            name text not null,
+            author text,
+            date char(30),
+            genre varchar(100),
+            style text,
+            dimmensions text
+        );
+        ''')
+
+
 class CustomImageNamePipeline(ImagesPipeline):
 
     def get_media_requests(self, item, info):
