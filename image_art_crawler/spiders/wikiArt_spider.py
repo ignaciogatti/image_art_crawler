@@ -5,7 +5,7 @@ from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from image_art_crawler.items import ImageArtCrawlerItem
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementNotVisibleException
 import time
 
 keys_map_wiki={u'G\xe9nero': 'genre',  u'Dimensi\xf3nes': 'dimmensions', u'Estilo': 'style', u'Fecha': 'date' }
@@ -17,23 +17,31 @@ class WikiArtSpider(CrawlSpider):
     def start_requests(self):
 
         browser = webdriver.Chrome()
-        browser.get('https://www.wikiart.org/es/paintings-by-style/impresionismo?select=featured#!#filterName:featured,viewType:masonry')
-        
-        SCROLL_PAUSE_TIME = 3
-        time.sleep(SCROLL_PAUSE_TIME)
+        #impressionism
+        #browser.get('https://www.wikiart.org/es/paintings-by-style/impresionismo?select=featured#!#filterName:featured,viewType:masonry')
+        #cubism
+        #browser.get('https://www.wikiart.org/es/paintings-by-style/cubismo?select=featured#!#filterName:featured,viewType:masonry')
+        #barroc
+        browser.get('https://www.wikiart.org/es/paintings-by-style/barroco?select=featured#!#filterName:featured,viewType:masonry')
+        PAUSE_TIME = 3
+        time.sleep(PAUSE_TIME)
         
         while True:
             try:
                 button_next = browser.find_element_by_xpath("//a[@class='masonry-load-more-button']")
                 button_next.click()
+                # Wait to load page
+                time.sleep(PAUSE_TIME)
+            except ElementNotVisibleException:
+                # Wait to load page
+                time.sleep(PAUSE_TIME)
             except NoSuchElementException:
-                break
-    
-            # Wait to load page
-            time.sleep(SCROLL_PAUSE_TIME)
+                break    
+
 
         urls = browser.find_elements_by_xpath("//div[@class='title-block']/a")
         urls_clear = urls[::2]
+        urls_clear = [ url.get_attribute('href') for url in urls_clear]
         for url in urls_clear:
             yield scrapy.Request(url=url, callback=self.parse_image)
       
